@@ -4,6 +4,7 @@ class App extends React.Component {
   render () {
     return (
       <React.Fragment>
+        HELLO WORLD
       </React.Fragment>
     );
   }
