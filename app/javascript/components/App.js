@@ -1,10 +1,12 @@
 import React from "react"
 import PropTypes from "prop-types"
+import { BaseballGame } from "./BaseballGame"
+
 class App extends React.Component {
   render () {
     return (
       <React.Fragment>
-        HELLO WORLD
+        <BaseballGame />
       </React.Fragment>
     );
   }

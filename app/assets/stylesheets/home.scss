@@ -33,6 +33,13 @@
     justify-content: space-between;
     margin-bottom: 2rem;
   }
+
+  .game-details { 
+    display: flex;
+    span {
+        padding: 0.25rem;
+    }
+  }
   
   .score {
     font-size: 1.5rem;
@@ -43,7 +50,7 @@
     color: #1c1c1c;
   }
   
-  .points {
+  .runs {
     margin-right: 1rem;
   }
   
