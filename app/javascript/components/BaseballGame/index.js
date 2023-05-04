@@ -24,13 +24,14 @@ class BaseballGame extends Component {
 
   throwPitch = () => {
     const { balls, strikes, outs, latestOutcome } = this.state;
-    const possibleOutcomes = ['Ball', 'Strike', 'Foul ball', 'In play, out(s)', 'In play, no out', 'In play, run(s)']
+    // const possibleOutcomes = ['Ball', 'Strike', 'Swinging strike' 'Foul ball', 'In play, out(s)', 'In play, no out', 'In play, run(s)']
+    const possibleOutcomes = ['Ball', 'Strike', 'Swining Strike', 'Foul ball']
     const outcome = this.decideOutcome(possibleOutcomes)
     // console.log(outcome)
     if (outcome === 'Ball') {
         this.handlePitchedBall(outcome);
     }
-    else if (outcome === 'Strike') {
+    else if (outcome === 'Strike' || 'Swining strike') {
         this.handlePitchedStrike(outcome);
     }
     else if (outcome === 'Foul ball') {
@@ -52,21 +53,77 @@ class BaseballGame extends Component {
     return possibleOutcomes[randomIndex];
   }
 
-  handlePitchedBall = outcome => {
+  resetCount = timeoutMs => {
+    setTimeout(() => {
+      this.setState({ balls: 0, strikes: 0 })
+    }, timeoutMs);
+  }
+
+  handleWalk = () => {
+    let outcome = 'Batter walked'
     this.setState(prevState => ({
-        balls: this.state.balls < 4 ? this.state.balls + 1 : 0,
+      latestOutcome: outcome, 
+      allOutcomes: [...prevState.allOutcomes, outcome]
+    }));
+    this.resetCount(1000);
+  }
+
+  handleOut = outcome => {
+    let outs = this.state.outs < 3 ? this.state.outs + 1 : this.state.outs
+    this.setState(prevState => ({
+      outs: outs,
+      latestOutcome: outcome, 
+      allOutcomes: [...prevState.allOutcomes, outcome]
+    }));
+
+    if (outs === 3) {
+      this.handleHalfInningChange();
+    }
+  }
+
+  handleHalfInningChange = () => {
+    console.log('I should be doing something')
+    let inningHalf = this.state.inningHalf;
+    console.log(inningHalf)
+    
+    let inning = this.state.inning;
+    console.log(inning)
+    if (inningHalf === 'Top') {
+      inningHalf = 'Bottom';
+    } else if (inningHalf === 'Bottom') {
+      inningHalf = 'Top';
+      inning = inning + 1
+    }
+
+    this.setState({ inning: inning, inningHalf: inningHalf, outs: 0 });
+  }
+
+  handlePitchedBall = outcome => {
+    let balls = this.state.balls < 4 ? this.state.balls + 1 : 0
+    this.setState(prevState => ({
+        balls: balls,
         latestOutcome: outcome, 
         allOutcomes: [...prevState.allOutcomes, outcome]
       }));
+      if (balls === 4) {
+        this.handleWalk();
+      }
     }
 
   handlePitchedStrike = outcome => {
+    console.log(this.state.outs)
+    const strikes = this.state.strikes < 3 ? this.state.strikes + 1 : 0
     this.setState(prevState => ({
-        strikes: this.state.strikes < 3 ? this.state.strikes + 1 : 0, 
+        strikes: strikes,
         latestOutcome: outcome, 
         allOutcomes: [...prevState.allOutcomes, outcome]
       }));
-  }
+    if (strikes === 3) {
+        const message = 'Strike' ? 'Batter strikes out looking' : 'Batter strikes out swinging' 
+        this.handleOut(message)
+        this.resetCount(1000);
+      }
+    }
 
   handleFoulBall = outcome => {
     this.setState(prevState => ({
@@ -78,11 +135,10 @@ class BaseballGame extends Component {
   
   handleInPlayNoOut = outcome => {
     this.setState(prevState => ({
-        balls: 0,
-        strikes: 0,
         latestOutcome: outcome, 
         allOutcomes: [...prevState.allOutcomes, outcome]
       }));
+    this.resetCount(1000);
   }
   
   handleInPlayOuts = outcome => {
@@ -92,6 +148,7 @@ class BaseballGame extends Component {
         latestOutcome: outcome, 
         allOutcomes: [...prevState.allOutcomes, outcome]
       }));
+    this.resetCount(1000);
   }
 
   handleInPlayRuns = outcome => {
@@ -101,6 +158,7 @@ class BaseballGame extends Component {
         latestOutcome: outcome, 
         allOutcomes: [...prevState.allOutcomes, outcome]
       }));
+      this.resetCount(1000);
   }
 
   render() {
@@ -115,8 +173,6 @@ class BaseballGame extends Component {
         latestOutcome,
         allOutcomes
     } = this.state;
-
-    console.log(allOutcomes)
 
     return (
         <>
